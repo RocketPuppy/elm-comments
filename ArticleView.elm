@@ -1,6 +1,7 @@
 module ArticleView  where
 
 import Types (..)
+import Router (Route)
 
 import Graphics.Input as I
 
@@ -85,7 +86,7 @@ article2Signal a = case a of
 render : Signal Article -> Signal Html
 render a = mkArticle <~ a
 
-route : Signal Article -> (Signal Bool, Signal Html)
+route : Signal Article -> Route
 route s = (onArticle, render s)
 
 onArticle : Signal Bool

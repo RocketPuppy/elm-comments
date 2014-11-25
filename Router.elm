@@ -10,7 +10,9 @@ import Window
 
 routeInput = I.input "titles"
 
-initRouter : [(Signal Bool, Signal Html)] -> Signal Html
+type Route = (Signal Bool, Signal Html)
+
+initRouter : [Route] -> Signal Html
 initRouter signals =
     let f (p, s) = sampleOn (keepWhen p 0 (merge (count s) (count p))) s
     in merges << map f <| signals

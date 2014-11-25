@@ -2,6 +2,8 @@ module TitlesView  where
 
 import Types (..)
 
+import Router (Route)
+
 import Html
 import Html (text, Html)
 import Html.Tags (..)
@@ -30,7 +32,7 @@ onTitles =
         _ -> False
     in f <~ screenInput.signal
 
-route : Signal [Title] -> (Signal Bool, Signal Html)
+route : Signal [Title] -> Route
 route s = (onTitles, render s)
 
 testRoute = route (constant titles)
