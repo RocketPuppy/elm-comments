@@ -1,0 +1,64 @@
+article {
+    margin-left: 35%;
+    margin-right: 25%;
+    position: relative;
+}
+
+/* Main article display */
+
+article > header {
+    margin-top: .2em;
+    margin-bottom: .2em;
+    font-size: 5em;
+    text-align: center;
+    width: 75%;
+}
+
+.paragraph {
+    position: relative;
+}
+
+.paragraph > p {
+    right: 75%;
+    width: 75%;
+}
+
+article > footer {
+    text-align: right;
+    width: 75%;
+    border-top: 1px solid;
+    padding-top: .5em;
+    padding-right: 1em;
+    font-style: italic;
+    font-size: 1.3em;
+}
+
+/* comment display */
+
+.comment p {
+    margin-top: 0px;
+}
+
+.comment footer {
+    font-style: italic;
+    border-top: 1px solid;
+    margin-bottom: 1em;
+}
+
+.comment-block {
+    padding-left: 1em;
+    position: absolute;
+    left: 75%;
+    top: 0%;
+    font-size: .8em;
+    padding-top: 0em;
+    padding-bottom: 1em;
+}
+
+.collapsed * {
+    display: none;
+}
+
+.collapsed .button {
+    display: inline;
+}
