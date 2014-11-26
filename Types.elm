@@ -1,6 +1,7 @@
 module Types where
 
 import Graphics.Input as I
+import Html (Html)
 
 data CommentBlock = CommentBlock { collapsed : Bool, comments : [Comment], input : I.Input Bool }
 data Paragraph = Paragraph String CommentBlock
@@ -9,7 +10,7 @@ data Article = Article Author Title [Paragraph]
 data Title = Title String
 data Author = Author String
 
-data Screen = TitleScreen | ArticleScreen
+data Route = TitleRoute | ArticleRoute
 
-screenInput : I.Input Screen
-screenInput = I.input TitleScreen
+type Renderer = I.Handle Route -> Signal Html
+type RoutePattern = (Route, Renderer)

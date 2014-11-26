@@ -2,37 +2,32 @@ module TitlesView  where
 
 import Types (..)
 
-import Router (Route)
-
 import Html
 import Html (text, Html)
 import Html.Tags (..)
 import Html.Attributes as A
 import Html.Events (..)
 
+import Graphics.Input as I
+
 mkTitle : Title -> Html
 mkTitle t = case t of
     Title title -> h1 [A.class "title"] [text title]
 
-mkTitles : [Title] -> Html
-mkTitles titles = div [A.class "title-block", onclick screenInput.handle (\_ -> ArticleScreen)] <| map mkTitle titles
+mkTitles : I.Handle Route -> [Title] -> Html
+mkTitles routeHandle titles = div [A.class "title-block", onclick routeHandle (\_ -> ArticleRoute)] <| map mkTitle titles
 
 titles : [Title]
 titles = [Title "Title 1", Title "Title 2"]
 
-render : Signal [Title] -> Signal Html
-render titles = mkTitles <~ titles
+onTitles : Signal Route -> Signal Bool
+onTitles signal =
+    let f s = case s of
+        TitleRoute -> True
+        _ -> False
+    in f <~ signal
+
+render : Signal [Title] -> Renderer
+render titles handle = mkTitles handle <~ titles
 
 testRender = render (constant titles)
-
-onTitles : Signal Bool
-onTitles =
-    let f s = case s of
-        TitleScreen -> True
-        _ -> False
-    in f <~ screenInput.signal
-
-route : Signal [Title] -> Route
-route s = (onTitles, render s)
-
-testRoute = route (constant titles)

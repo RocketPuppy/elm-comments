@@ -4,16 +4,17 @@ import ArticleView
 import TitlesView
 
 import Types (..)
-import Router (initRouter)
+import Router (..)
+import Network (..)
 
 import Html (Html)
 import Html
 
 import Window
 
-router = initRouter [TitlesView.testRoute, ArticleView.testRoute]
-
 main = render Window.dimensions router
+
+router = initRouter TitleRoute [(TitleRoute, TitlesView.render getTitles), (ArticleRoute, ArticleView.testRender)]
 
 render : Signal (Int, Int) -> Signal Html -> Signal Element
 render dims htmls = (\(x, y) html -> Html.toElement x y html) <~ dims ~ htmls

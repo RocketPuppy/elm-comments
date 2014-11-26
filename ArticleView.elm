@@ -1,7 +1,6 @@
 module ArticleView  where
 
 import Types (..)
-import Router (Route)
 
 import Graphics.Input as I
 
@@ -83,18 +82,7 @@ article2Signal : Article -> Signal Article
 article2Signal a = case a of
     Article author title ps -> (Article author title) <~ (combine (map paragraphs2Signal ps))
 
-render : Signal Article -> Signal Html
-render a = mkArticle <~ a
+render : Signal Article -> Renderer
+render a _ = mkArticle <~ a
 
-route : Signal Article -> Route
-route s = (onArticle, render s)
-
-onArticle : Signal Bool
-onArticle =
-    let f s = case s of
-        ArticleScreen -> True
-        _ -> False
-    in f <~ screenInput.signal
-
-testRoute = route (article2Signal theArticle)
 testRender = render (article2Signal theArticle)
