@@ -1,27 +1,21 @@
 module Router (initRouter) where
 
-import Dict (Dict)
-import Dict
-import Graphics.Input as I
+import Graphics.Input (Handle, input)
 
 import Html (Html)
-import Html
-import Window
 
-import Types (..)
-
-onRoute : Route -> Signal Route -> Signal Bool
+onRoute : a -> Signal a -> Signal Bool
 onRoute r routes = (\r' -> r' == r) <~ routes
 
-initRouter : Route -> [RoutePattern] -> Signal Html
+initRouter : a -> [(a, Handle a -> Signal b)] -> Signal b
 initRouter start signals =
-    let input = I.input start
-        activeHtml (route, htmlFn) =
-            let predicate     = onRoute route input.signal
-                html          = htmlFn input.handle
-                changes       = merge (count predicate) (count html)
+    let routeInput = input start
+        activeOutput (route, outFn) =
+            let predicate     = onRoute route routeInput.signal
+                output        = outFn routeInput.handle
+                changes       = merge (count predicate) (count output)
                 activeChanges = keepWhen predicate 0 changes
-            in sampleOn activeChanges html
-        htmlSignals    = map activeHtml signals
-        signalSwitcher = merges htmlSignals
+            in sampleOn activeChanges output
+        outputSignals  = map activeOutput signals
+        signalSwitcher = merges outputSignals
     in signalSwitcher

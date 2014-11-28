@@ -3,6 +3,7 @@ module ArticleView  where
 import Types (..)
 
 import Graphics.Input as I
+import Maybe
 
 import Html
 import Html (text, Html)
@@ -82,7 +83,9 @@ article2Signal : Article -> Signal Article
 article2Signal a = case a of
     Article author title ps -> (Article author title) <~ (combine (map paragraphs2Signal ps))
 
-render : Signal Article -> Renderer
-render a _ = mkArticle <~ a
+render : Signal (Maybe Article) -> Renderer
+render a _ = (Maybe.maybe (text "failed") (\a -> mkArticle a)) <~ a
+-- should be:
+-- render a _ = (Maybe.maybe (constant <| text "failed") (\a -> mkArticle <~ article2Signal a) <~ a
 
-testRender = render (article2Signal theArticle)
+--testRender = render (Maybe.Just <~ article2Signal theArticle)
