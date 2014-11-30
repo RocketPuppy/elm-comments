@@ -1,20 +1,48 @@
-module Comments where
+module Comments (State, step, init, render, Action) where
 
-import ArticleView
 import TitlesView
+import ArticleView
 
-import Types (..)
-import Router (..)
-import Network (..)
-
+import Debug
+import Graphics.Input as I
+import Network
 import Html (Html)
 import Html
 
-import Window
+data Action = Noop | TitlesAction TitlesView.Action | ArticleAction ArticleView.Action
+type State = { mostRecentAction : Action, titlesView : TitlesView.State Action, articleView : ArticleView.State Action }
 
-main = render Window.dimensions router
+step : Action -> State -> State
+step a s =
+    let s' = { s | mostRecentAction <- a }
+    in case a of
+        TitlesAction a -> { s' | titlesView <- TitlesView.step a s.titlesView }
+        ArticleAction a -> { s' | articleView <- ArticleView.step a s.articleView }
+        Noop -> s
 
-router = initRouter TitleRoute [(TitleRoute, TitlesView.render getTitles), (ArticleRoute, ArticleView.render (getArticle <| constant (Title "Article Title")))]
+initialAction = TitlesAction (TitlesView.refreshAction [])
 
-render : Signal (Int, Int) -> Signal Html -> Signal Element
-render dims htmls = (\(x, y) html -> Html.toElement x y html) <~ dims ~ htmls
+init : (Signal Action, State)
+init =
+    let actionInput = I.input initialAction
+    in (merges [actionInput.signal, httpTitles, httpArticle actionInput.signal],
+           { mostRecentAction = initialAction
+           , titlesView = TitlesView.init TitlesAction actionInput.handle
+           , articleView = ArticleView.init ArticleAction actionInput.handle
+           }
+       )
+
+render : State -> Html
+render s = case s.mostRecentAction of
+    TitlesAction _ -> TitlesView.render s.titlesView
+    ArticleAction _ -> ArticleView.render s.articleView
+
+httpTitles : Signal Action
+httpTitles = (TitlesAction << TitlesView.refreshAction) <~ Network.getTitles
+
+httpArticle : Signal Action -> Signal Action
+httpArticle actions =
+    let extractString a = case a of
+            TitlesAction (TitlesView.ViewArticle (TitlesView.Title t)) -> Just t
+            _ -> Nothing
+    in (ArticleAction << ArticleView.ViewArticle) <~ (Network.getArticle <| extractString <~ actions)

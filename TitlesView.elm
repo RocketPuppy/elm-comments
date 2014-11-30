@@ -1,33 +1,30 @@
-module TitlesView  where
-
-import Types (..)
+module TitlesView (Title(..), Action(..), State, step, render, init, refreshAction) where
 
 import Html
 import Html (text, Html)
 import Html.Tags (..)
 import Html.Attributes as A
 import Html.Events (..)
-
 import Graphics.Input as I
 
-mkTitle : Title -> Html
-mkTitle t = case t of
-    Title title -> h1 [A.class "title"] [text title]
+data Title = Title String
 
-mkTitles : I.Handle Route -> [Title] -> Html
-mkTitles routeHandle titles = div [A.class "title-block", onclick routeHandle (\_ -> ArticleRoute)] <| map mkTitle titles
+data Action = Refresh [Title] | ViewArticle Title
+type State b = { titles : [Title], actionH : I.Handle b, actionFn : (Action -> b) }
 
-titles : [Title]
-titles = [Title "Title 1", Title "Title 2"]
+refreshAction = Refresh
 
-onTitles : Signal Route -> Signal Bool
-onTitles signal =
-    let f s = case s of
-        TitleRoute -> True
-        _ -> False
-    in f <~ signal
+init : (Action -> b) -> I.Handle b -> State b
+init f h = { titles = [], actionH = h, actionFn = f }
 
-render : Signal [Title] -> Renderer
-render titles handle = mkTitles handle <~ titles
+step : Action -> State b -> State b
+step a s = case a of
+    Refresh ts -> { s | titles <- ts }
+    ViewArticle _ -> s
 
-testRender = render (constant titles)
+mkTitle : I.Handle b -> (Action -> b) -> Title -> Html
+mkTitle h f t = case t of
+    Title title -> h1 [A.class "title", onclick h (f << (\_ -> ViewArticle t))] [text title]
+
+render : State b -> Html
+render s = div [A.class "title-block"] <| map (mkTitle s.actionH s.actionFn) s.titles
